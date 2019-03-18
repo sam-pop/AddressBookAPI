@@ -1,8 +1,12 @@
 const elasticsearch = require("elasticsearch");
 
+const HOST = "localhost";
+const PORT = 9200;
+
 // elasticsearch client setup
 const db = new elasticsearch.Client({
-  host: "localhost:9200"
+  host: `${HOST}:${PORT}`,
+  log: "trace"
 });
 
 // check that elasticsearch server is running properly

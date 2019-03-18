@@ -1,31 +1,43 @@
 const Contact = require("../models");
 const db = require("../db");
 
-const indexName = "addressbook";
-const documentType = "contacts";
+const INDEX = "addressbook";
+const DOCTYPE = "contacts";
 
 module.exports = {
   getAllContacts: function(pageSize, pageOffset, query) {},
   getContact: function(name) {
-    db.get({
-      index: indexName,
-      type: documentType,
+    return db.get({
+      index: INDEX,
+      type: DOCTYPE,
       id: name
     });
   },
   addContact: function(contact) {
-    const { name, address, phone, email } = contact;
-    db.create({
-      index: indexName,
-      type: documentType,
+    // const { name, address, phone, email } = contact;
+    const { name } = contact;
+    const contactToAdd = new Contact(contact);
+    return db.create({
+      index: INDEX,
+      type: DOCTYPE,
       id: name,
-      body: {
-        address: address,
-        phone: phone,
-        email: email
-      }
+      body: contactToAdd
     });
   },
-  updateContact: function(name) {},
-  deleteContact: function(name) {}
+  updateContact: function(name, contact) {
+    const contactToAdd = new Contact(contact);
+    return db.update({
+      index: INDEX,
+      type: DOCTYPE,
+      id: name,
+      body: { ...contactToAdd, doc: { title: "Updated" } }
+    });
+  },
+  deleteContact: function(name) {
+    return db.delete({
+      index: INDEX,
+      type: DOCTYPE,
+      id: name
+    });
+  }
 };
