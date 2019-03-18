@@ -1,0 +1,24 @@
+{
+  "name": "addressbookapi",
+  "version": "1.0.0",
+  "description": "RESTful addressbook API w/ elasticsearch",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sam-pop/AddressBookAPI.git"
+  },
+  "author": "Samuel Poplovitch",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sam-pop/AddressBookAPI/issues"
+  },
+  "homepage": "https://github.com/sam-pop/AddressBookAPI#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "elasticsearch": "^15.4.1",
+    "express": "^4.16.4"
+  }
+}
