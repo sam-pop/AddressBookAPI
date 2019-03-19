@@ -19,7 +19,7 @@ module.exports = {
       }
     });
   },
-  getContactByQuery: async function(pageSize, page, query) {
+  getContactsByQuery: async function(pageSize, page, query) {
     const from = (page - 1) * pageSize;
     return await db.search({
       index: INDEX,
@@ -28,7 +28,12 @@ module.exports = {
         size: pageSize,
         from: from,
         query: {
-          match: { name: query }
+          query_string: {
+            // search performed on all fields
+            // (next line can be uncommented to search only in the 'name' field)
+            // default_field: "name",
+            query: query
+          }
         }
       }
     });

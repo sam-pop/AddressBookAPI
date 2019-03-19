@@ -4,16 +4,14 @@ const addressBookController = require("../controllers");
 
 // GET
 router
-  // TODO: FINISH THIS ROUTE
-  // http://localhost:3001/contact?pageSize={}&page={}&query={}
+  // http://<HOST>:<PORT>/contact?pageSize={}&page={}&query={}
   .get("/contact", (req, res) => {
     if (req.query) {
       let { pageSize, page, query } = req.query;
-
-      // query = JSON.parse(req.query.query);
       if (!pageSize || isNaN(pageSize)) pageSize = process.env.PAGE_SIZE || 10;
       if (!page || isNaN(page)) page = process.env.PAGE || 1;
-      if (!query) {
+      if (!query || query === "{}") {
+        // get all contacts
         addressBookController
           .getAllContacts(pageSize, page)
           .then(result => {
@@ -26,8 +24,9 @@ router
             res.status(400).json(err.message);
           });
       } else {
+        // get contact by query
         addressBookController
-          .getContactByQuery(pageSize, page, query)
+          .getContactsByQuery(pageSize, page, query)
           .then(result => {
             console.log(result);
             if (result.hits.total > 0)
@@ -40,6 +39,7 @@ router
       }
     }
   })
+
   // get contact by name
   .get("/contact/:name", (req, res) => {
     addressBookController
@@ -57,6 +57,7 @@ router
 // POST
 router.post(
   "/contact",
+  // data validation
   [
     check("name")
       .exists({ checkNull: true })
@@ -91,6 +92,7 @@ router
   // update contact by name
   .put(
     "/contact/:name",
+    // data validation
     [
       check("name")
         .exists({ checkNull: true })
