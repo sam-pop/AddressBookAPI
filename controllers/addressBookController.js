@@ -1,34 +1,33 @@
-const Contact = require("../models");
+require("../models");
 const db = require("../db");
 
-const INDEX = "addressbook";
-const DOCTYPE = "contacts";
+const INDEX = process.env.INDEX || "addressbook";
+const TYPE_DOCUMENT = process.env.TYPE_DOCUMENT || "contact";
 
 module.exports = {
   getAllContacts: function(pageSize, pageOffset, query) {},
   getContact: function(name) {
     return db.get({
       index: INDEX,
-      type: DOCTYPE,
+      type: TYPE_DOCUMENT,
       id: name
     });
   },
   addContact: function(contact) {
     // const { name, address, phone, email } = contact;
     const { name } = contact;
-    const contactToAdd = new Contact(contact);
     return db.create({
       index: INDEX,
-      type: DOCTYPE,
+      type: TYPE_DOCUMENT,
       id: name,
-      body: contactToAdd
+      body: contact
     });
   },
   updateContact: function(name, contact) {
     const contactToAdd = new Contact(contact);
     return db.update({
       index: INDEX,
-      type: DOCTYPE,
+      type: TYPE_DOCUMENT,
       id: name,
       body: { ...contactToAdd, doc: { title: "Updated" } }
     });
@@ -36,7 +35,7 @@ module.exports = {
   deleteContact: function(name) {
     return db.delete({
       index: INDEX,
-      type: DOCTYPE,
+      type: TYPE_DOCUMENT,
       id: name
     });
   }

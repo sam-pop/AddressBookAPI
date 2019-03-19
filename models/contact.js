@@ -1,15 +1,21 @@
-// Contact constructor
-// TODO: ADD INPUT VALIDATION
-function Contact(contact) {
-  if (contact.name) this.name = contact.name;
-  else return undefined;
+const db = require("../db");
 
-  if (contact.address) this.address = contact.address;
-  else this.address = null;
-  if (contact.phone) this.phone = contact.phone;
-  else this.phone = null;
-  if (contact.email) this.email = contact.email;
-  else this.email = null;
-}
+const INDEX = process.env.INDEX || "addressbook";
+const TYPE_DOCUMENT = process.env.TYPE_DOCUMENT || "contact";
 
-module.exports = Contact;
+db.indices
+  .putMapping({
+    index: INDEX,
+    type: TYPE_DOCUMENT,
+    body: {
+      contact: {
+        properties: {
+          name: { type: "text" },
+          address: { type: "text" },
+          phone: { type: "text" },
+          email: { type: "text" }
+        }
+      }
+    }
+  })
+  .catch(err => console.log(err.message));

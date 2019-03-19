@@ -18,7 +18,9 @@
   "homepage": "https://github.com/sam-pop/AddressBookAPI#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "dotenv": "^7.0.0",
     "elasticsearch": "^15.4.1",
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "express-validator": "^5.3.1"
   }
 }

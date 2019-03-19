@@ -1,17 +1,37 @@
 const router = require("express").Router();
-const Contact = require("../models");
+const { check, validationResult } = require("express-validator/check");
 const addressBookController = require("../controllers");
 
 // TODO map indices
-router.get("/", (req, res) => {
-  res.json("hello world");
+router.get("/contact", (req, res) => {
+  if (req.query) console.log(req.query);
 });
 
-router.post("/contact", (req, res) => {
-  const contact = new Contact(req.body);
-  //TODO: if contact is valid do
-  addressBookController.addContact(contact);
-});
+router.post(
+  "/contact",
+  [
+    check("name")
+      .exists({ checkNull: true })
+      .isLength({ min: 2 }),
+    check("address")
+      .optional()
+      .isLength({ max: 200 }),
+    check("phone")
+      .optional()
+      .isInt()
+      .isLength({ max: 10 }),
+    check("email")
+      .optional()
+      .isEmail()
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+    addressBookController.addContact(req.body);
+  }
+);
 
 router
   //get contact by name

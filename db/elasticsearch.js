@@ -1,7 +1,7 @@
 const elasticsearch = require("elasticsearch");
 
-const HOST = "localhost";
-const PORT = 9200;
+const HOST = process.env.ELASTICSEARCH_HOST || "localhost";
+const PORT = process.env.ELASTICSEARCH_PORT || 9200;
 
 // elasticsearch client setup
 const db = new elasticsearch.Client({
@@ -9,7 +9,6 @@ const db = new elasticsearch.Client({
   log: "trace"
 });
 
-// check that elasticsearch server is running properly
 db.ping(
   {
     requestTimeout: 1000

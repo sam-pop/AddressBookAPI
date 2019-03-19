@@ -1,3 +1,3 @@
-const addressBook = require("./addressBook");
+const elasticsearch = require("./elasticsearch");
 
-module.exports = addressBook;
+module.exports = elasticsearch;
