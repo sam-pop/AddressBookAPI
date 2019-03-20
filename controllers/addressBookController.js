@@ -29,8 +29,7 @@ module.exports = {
         from: from,
         query: {
           query_string: {
-            // search performed on all fields
-            // (next line can be uncommented to search only in the 'name' field)
+            // search performed on all fields (next line can be uncommented to search only in the 'name' field)
             // default_field: "name",
             query: query
           }
@@ -64,6 +63,14 @@ module.exports = {
   },
   updateContact: async function(qName, contact) {
     const { name, address, phone, email } = contact;
+    let changeName = "",
+      changeAddress = "",
+      changePhone = "",
+      changeEmail = "";
+    if (name) changeName = `ctx._source.name = '${name}';`;
+    if (address) changeAddress = `ctx._source.address = '${address}';`;
+    if (phone) changePhone = `ctx._source.phone = '${phone}';`;
+    if (email) changeEmail = `ctx._source.email = '${email}';`;
     return await db.updateByQuery({
       index: INDEX,
       type: TYPE_DOCUMENT,
@@ -71,7 +78,7 @@ module.exports = {
         query: {
           match: { name: qName }
         },
-        script: `ctx._source.name = '${name}'; ctx._source.address = '${address}'; ctx._source.phone = '${phone}'; ctx._source.email = '${email}';`
+        script: `${changeName} ${changeAddress} ${changePhone} ${changeEmail}`
       }
     });
   },

@@ -4,39 +4,39 @@ const addressBookController = require("../controllers");
 
 // GET
 router
+  .get("/", (req, res) => {
+    res.status(200).send("Welcome to AddressBookAPI");
+  })
+
   // http://<HOST>:<PORT>/contact?pageSize={}&page={}&query={}
   .get("/contact", (req, res) => {
-    if (req.query) {
-      let { pageSize, page, query } = req.query;
-      if (!pageSize || isNaN(pageSize)) pageSize = process.env.PAGE_SIZE || 10;
-      if (!page || isNaN(page)) page = process.env.PAGE || 1;
-      if (!query || query === "{}") {
-        // get all contacts
-        addressBookController
-          .getAllContacts(pageSize, page)
-          .then(result => {
-            console.log(result);
-            if (result.hits.total > 0)
-              res.status(200).json(result.hits.hits.map(h => h._source));
-            else res.status(404).send("No contacts");
-          })
-          .catch(err => {
-            res.status(400).json(err.message);
-          });
-      } else {
-        // get contact by query
-        addressBookController
-          .getContactsByQuery(pageSize, page, query)
-          .then(result => {
-            console.log(result);
-            if (result.hits.total > 0)
-              res.status(200).json(result.hits.hits.map(h => h._source));
-            else res.status(404).send("No contacts");
-          })
-          .catch(err => {
-            res.status(400).json(err.message);
-          });
-      }
+    let { pageSize, page, query } = req.query;
+    if (!pageSize || isNaN(pageSize)) pageSize = +process.env.PAGE_SIZE || 100;
+    if (!page || isNaN(page)) page = +process.env.PAGE || 1;
+    if (!query || query === "{}") {
+      // get all contacts
+      addressBookController
+        .getAllContacts(pageSize, page)
+        .then(result => {
+          if (result.hits.total > 0)
+            res.status(200).json(result.hits.hits.map(h => h._source));
+          else res.status(404).send("No contacts");
+        })
+        .catch(err => {
+          res.status(400).json(err.message);
+        });
+    } else {
+      // get contact by query
+      addressBookController
+        .getContactsByQuery(pageSize, page, query)
+        .then(result => {
+          if (result.hits.total > 0)
+            res.status(200).json(result.hits.hits.map(h => h._source));
+          else res.status(404).send("No contacts");
+        })
+        .catch(err => {
+          res.status(400).json(err.message);
+        });
     }
   })
 
@@ -78,12 +78,17 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
-    addressBookController
-      .addContact(req.body)
-      .then(() => res.status(201).json(`${req.body.name} was added!`))
-      .catch(err => {
-        res.status(400).json(err.message);
-      });
+    // we check that the request 'name' does not already exists before adding new contact
+    addressBookController.getContactByName(req.body.name).then(result => {
+      if (result.hits.total === 0)
+        addressBookController
+          .addContact(req.body)
+          .then(() => res.status(201).json(`${req.body.name} was added!`))
+          .catch(err => {
+            res.status(400).json(err.message);
+          });
+      else res.status(400).json("Name already exists!");
+    });
   }
 );
 
@@ -113,16 +118,35 @@ router
       if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
       }
-      addressBookController
-        .updateContact(req.params.name, req.body)
-        .then(result => {
-          if (result.updated > 0)
-            res.status(200).json(`${req.body.name} was updated!`);
-          else res.status(404).json(`${req.params.name} does not exist`);
-        })
-        .catch(err => {
-          res.status(400).json(err.message);
+      // we check that the new 'name' is the same as the old 'name'
+      if (!req.body.name || req.params.name === req.body.name) {
+        addressBookController
+          .updateContact(req.params.name, req.body)
+          .then(result => {
+            if (result.updated > 0)
+              res.status(200).json(`${req.params.name} was updated!`);
+            else res.status(404).json(`${req.params.name} does not exist`);
+          })
+          .catch(err => {
+            res.status(400).json(err.message);
+          });
+      } else {
+        // we check that the new 'name' is unique
+        addressBookController.getContactByName(req.body.name).then(result => {
+          if (result.hits.total === 0)
+            addressBookController
+              .updateContact(req.params.name, req.body)
+              .then(result => {
+                if (result.updated > 0)
+                  res.status(200).json(`${req.body.name} was updated!`);
+                else res.status(404).json(`${req.params.name} does not exist`);
+              })
+              .catch(err => {
+                res.status(400).json(err.message);
+              });
+          else res.status(400).json("New name already used!");
         });
+      }
     }
   );
 
